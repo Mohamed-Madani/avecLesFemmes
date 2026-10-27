@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Process\Process;
 
 #[AsCommand(
     name: 'mohamedmadani:migration',
@@ -24,16 +25,23 @@ class MigrationCommand extends Command
         $makeMigration = $this->getApplication()->find('make:migration');
         $makeMigration->run(new ArrayInput([]), $output);
 
-        // 2. On exécute les migrations sans poser de question
+        // 2. On exécute les migrations sans poser de question.
+        // On lance un nouveau processus, sinon Doctrine ne voit pas
+        // le fichier de migration qui vient d'être créé.
         $io->section('Exécution de la migration');
-        $migrate = $this->getApplication()->find('doctrine:migrations:migrate');
-        $migrateInput = new ArrayInput([
-            '--allow-no-migration' => true,
+        $process = new Process([
+            PHP_BINARY,
+            'bin/console',
+            'doctrine:migrations:migrate',
+            '--no-interaction',
+            '--allow-no-migration',
         ]);
-        $migrateInput->setInteractive(false);
-        $resultat = $migrate->run($migrateInput, $output);
+        $process->setTimeout(null);
+        $process->run(function ($type, $texte) use ($output) {
+            $output->write($texte);
+        });
 
-        if ($resultat !== Command::SUCCESS) {
+        if (!$process->isSuccessful()) {
             $io->error('La migration a échoué.');
             return Command::FAILURE;
         }
