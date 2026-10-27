@@ -77,7 +77,7 @@
     },
     "scripts": {
         "auto-scripts": {
-            "cache:clear": "symfony-cmd",
+            "mohamedmadani:cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "importmap:install": "symfony-cmd"
         },
@@ -86,7 +86,20 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "mohamedmadani:db:create": "php bin/console mohamedmadani:db:create",
+        "mohamedmadani:cache:clear": "php bin/console mohamedmadani:cache:clear",
+        "mohamedmadani:make:entity": [
+            "Composer\\Config::disableProcessTimeout",
+            "php bin/console mohamedmadani:make:entity"
+        ],
+        "mohamedmadani:migration": "php bin/console mohamedmadani:migration"
+    },
+    "scripts-descriptions": {
+        "mohamedmadani:db:create": "Supprime la base si elle existe puis la recrée",
+        "mohamedmadani:cache:clear": "Vide le cache (lancé automatiquement après composer install / update)",
+        "mohamedmadani:make:entity": "Crée une entité",
+        "mohamedmadani:migration": "Génère la migration et l'exécute"
     },
     "conflict": {
         "symfony/symfony": "*"
